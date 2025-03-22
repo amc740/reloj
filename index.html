@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temporizador Visual</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+        #main-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        #pictograma {
+            width: 400px;
+            height: 400px;
+            margin-right: 40px;
+        }
+        #timer-container {
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: conic-gradient(red 0deg, lightgray 0deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 96px;
+            font-weight: bold;
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            animation: fall 3s linear infinite;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Temporizador Visual</h1>
+    <div class="controls">
+        <label for="actividad">Selecciona una actividad:</label>
+        <select id="actividad" onchange="cambiarPictograma()">
+            <option value="comer">Comer</option>
+            <option value="banarse">Bañarse</option>
+            <option value="dormir">Dormir</option>
+        </select>
+        <br><br>
+        <label for="tiempo">Tiempo en segundos:</label>
+        <input type="number" id="tiempo" min="1" value="10">
+        <br><br>
+        <button onclick="iniciarTemporizador()">Iniciar</button>
+        <button onclick="detenerTemporizador()">Detener</button>
+    </div>
+
+    <div id="main-container">
+        <img id="pictograma" src="comer.png" alt="Actividad">
+        <div id="timer-container">0s</div>
+    </div>
+
+    <script>
+        let tiempoRestante = 0;
+        let tiempoTotal = 0;
+        let intervalo;
+
+        function actualizarVisualizacion() {
+            const porcentaje = tiempoRestante / tiempoTotal * 360;
+            document.getElementById("timer-container").style.background = `conic-gradient(red ${porcentaje}deg, lightgray ${porcentaje}deg)`;
+            document.getElementById("timer-container").innerText = `${tiempoRestante}s`;
+        }
+
+        function iniciarTemporizador() {
+            if (intervalo) return;
+            tiempoTotal = parseInt(document.getElementById("tiempo").value);
+            if (isNaN(tiempoTotal) || tiempoTotal <= 0) {
+                alert("Por favor, ingrese un número válido.");
+                return;
+            }
+            tiempoRestante = tiempoTotal;
+            actualizarVisualizacion();
+            intervalo = setInterval(() => {
+                if (tiempoRestante > 0) {
+                    tiempoRestante--;
+                    actualizarVisualizacion();
+                } else {
+                    clearInterval(intervalo);
+                    intervalo = null;
+                    mostrarCelebracion();
+                }
+            }, 1000);
+        }
+
+        function detenerTemporizador() {
+            clearInterval(intervalo);
+            intervalo = null;
+            tiempoRestante = 0;
+            actualizarVisualizacion();
+        }
+
+        function cambiarPictograma() {
+            const actividad = document.getElementById("actividad").value;
+            document.getElementById("pictograma").src = `${actividad}.png`;
+        }
+
+        function mostrarCelebracion() {
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement("div");
+                confetti.classList.add("confetti");
+                confetti.style.left = Math.random() * 100 + "vw";
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                confetti.style.animationDuration = (2 + Math.random() * 3) + "s";
+                document.body.appendChild(confetti);
+
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>
